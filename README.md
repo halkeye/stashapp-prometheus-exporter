@@ -39,7 +39,7 @@ services:
 
 Then run:
 ```bash
-docker-compose up -d
+docker compose up -d
 # or
 podman-compose up -d
 ```

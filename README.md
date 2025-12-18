@@ -26,8 +26,7 @@ For a complete stack example with Stash, Prometheus, and Grafana, see `podman-co
 - `SCRAPE_INTERVAL_SECONDS` - How often to query Stash (default: `30`)
 - `EXPORTER_LISTEN_PORT` - Metrics port (default: `9100`)
 
-## Metrics (high level)
-
+## Metrics
 ### Library statistics
 - `stash_scenes_total` - Total scenes
 - `stash_images_total` - Total images

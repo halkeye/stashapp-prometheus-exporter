@@ -6,7 +6,7 @@ Prometheus exporter for StashApp that exposes library stats and playtime metrics
 
 Queries your Stash instance and exposes metrics like total scenes, images, performers, watch time, and play patterns (by day of week and hour of day) on `/metrics` for Prometheus to scrape.
 
-These queries are based on the public Stash GraphQL API documentation (`https://docs.stashapp.cc/api/?utm_source=openai`) and are intended to return cheap, aggregated statistics suitable for exporter usage.
+These queries are based on the public Stash GraphQL API documentation (`https://docs.stashapp.cc/api`) and are intended to return cheap, aggregated statistics suitable for exporter usage.
 
 ### Docker/Podman
 

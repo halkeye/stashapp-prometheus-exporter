@@ -61,7 +61,7 @@ You can derive the "missing" side and ratios in PromQL, for example:
 - `stash_total_play_count` - Total number of scene plays
 - `stash_total_play_duration_seconds` - Total play duration across all scenes in seconds
 - `stash_scenes_played_total` - Scenes that have at least one recorded play
-- `stash_total_o_count` - Total orgasm counter across all scenes
+- `stash_total_o_count` - Total o-counter across all scenes
 
 ### Playtime patterns
 - `stash_play_duration_seconds_by_dow{day_of_week}` - Play duration by day of week (Mon, Tue, Wed, Thu, Fri, Sat, Sun)

@@ -8,6 +8,9 @@ Queries your Stash instance and exposes metrics like total scenes, images, perfo
 
 These queries are based on the public Stash GraphQL API documentation (`https://docs.stashapp.cc/api`) and are intended to return cheap, aggregated statistics suitable for exporter usage.
 
+See `dashboards/stashapp-overview.json` for a Grafana dashboard that uses all of these.
+<img width="690" height="417" alt="image" src="https://github.com/user-attachments/assets/59b422c0-713a-4a3e-8c2e-927d9efdd8dd" />
+
 ## Run with Docker / Podman
 
 ```bash
@@ -66,7 +69,5 @@ You can derive the "missing" side and ratios in PromQL, for example:
 
 ### Exporter health
 - `stash_up` - 1 if the last scrape of Stash GraphQL succeeded, 0 otherwise
-
-See `dashboards/stashapp-overview.json` for a Grafana dashboard that uses all of these.
 
 Images are automatically built and pushed to GHCR on pushes to `main` and version tags.

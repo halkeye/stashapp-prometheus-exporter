@@ -149,6 +149,12 @@ stash_play_duration_seconds_by_hour = Gauge(
     labelnames=("hour_of_day",),
 )
 
+stash_tag_usage_count = Gauge(
+    "stash_tag_usage_count",
+    "Number of played scenes using each tag.",
+    labelnames=("tag_name",),
+)
+
 
 def _safe_int(value: Any) -> int:
     try:
@@ -314,6 +320,39 @@ def update_metadata_from_scenes(scenes: Iterable[Dict[str, Any]]) -> None:
     stash_scene_markers_total.set(float(marker_total))
 
 
+def update_tag_usage_from_scenes(scenes: Iterable[Dict[str, Any]]) -> None:
+    """Update tag usage metrics from played scene data.
+
+    `scenes` is expected to be the value of `findScenes.scenes` from the
+    `SCENE_PLAY_HISTORY_QUERY` in `queries.py`. Tag names are included
+    directly in the scene data.
+
+    This function counts how many played scenes (scenes with play_count > 0)
+    use each tag and updates the `stash_tag_usage_count` metric with tag names
+    as labels. This provides dynamic, engagement-based tag popularity metrics
+    based only on played scenes.
+    """
+
+    # Count tag usage only from played scenes
+    tag_usage_counts: Dict[str, int] = {}
+
+    for scene in scenes:
+        # Only count tags from scenes that have been played
+        play_count = _safe_int(scene.get("play_count"))
+        if play_count <= 0:
+            continue
+
+        scene_tags = scene.get("tags") or []
+        for tag_obj in scene_tags:
+            tag_name = str(tag_obj.get("name", ""))
+            if tag_name:
+                tag_usage_counts[tag_name] = tag_usage_counts.get(tag_name, 0) + 1
+
+    # Update metrics for tags found in played scenes
+    for tag_name, count in tag_usage_counts.items():
+        stash_tag_usage_count.labels(tag_name=tag_name).set(float(count))
+
+
 __all__ = [
     "stash_scenes_total",
     "stash_images_total",
@@ -339,9 +378,11 @@ __all__ = [
     "stash_scene_markers_total",
     "stash_play_duration_seconds_by_dow",
     "stash_play_duration_seconds_by_hour",
+    "stash_tag_usage_count",
     "stash_up",
     "update_metrics_from_stats",
     "update_playtime_buckets_from_scenes",
     "update_metadata_from_scenes",
+    "update_tag_usage_from_scenes",
 ]
 

@@ -21,6 +21,7 @@ from .metrics import (
     update_metadata_from_scenes,
     update_metrics_from_stats,
     update_playtime_buckets_from_scenes,
+    update_tag_usage_from_scenes,
 )
 from .queries import LIBRARY_STATS_QUERY, SCENE_PLAY_HISTORY_QUERY
 from .stash_client import StashClient, StashClientError
@@ -59,6 +60,9 @@ def _scrape_once(client: StashClient) -> None:
         scenes = scenes_root.get("scenes") or []
         update_playtime_buckets_from_scenes(scenes)
         update_metadata_from_scenes(scenes)
+
+        # Update tag usage metrics from played scenes only.
+        update_tag_usage_from_scenes(scenes)
 
         stash_up.set(1.0)
     except StashClientError as exc:

@@ -44,7 +44,7 @@ query ScenePlayHistory {
     scenes {
       organized
       stash_ids { endpoint stash_id }
-      tags { id }
+      tags { name }
       performers { id }
       studio { id }
       scene_markers { id }

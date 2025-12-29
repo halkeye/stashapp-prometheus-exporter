@@ -169,7 +169,7 @@ stash_tag_usage_count = Gauge(
 
 stash_orgasm_timestamp_seconds = Gauge(
     "stash_orgasm_timestamp_seconds",
-    "Unix timestamp of orgasm events. Each orgasm from each scene is tracked as a separate time series with scene_id and orgasm_index labels.",
+    "Unix timestamp of orgasm events in milliseconds. Each orgasm from each scene is tracked as a separate time series with scene_id and orgasm_index labels.",
     labelnames=("scene_id", "orgasm_index"),
 )
 
@@ -410,9 +410,10 @@ def update_orgasm_history_from_scenes(scenes: Iterable[Dict[str, Any]]) -> None:
             dt = _parse_utc_timestamp(str(timestamp_str))
             if dt is None:
                 continue
-            # Convert to Unix timestamp (seconds since epoch)
-            unix_timestamp = dt.timestamp()
-            timestamps.append(unix_timestamp)
+            # Convert to Unix timestamp in milliseconds (for Grafana dateTime unit compatibility)
+            unix_timestamp_seconds = dt.timestamp()
+            unix_timestamp_milliseconds = unix_timestamp_seconds * 1000.0
+            timestamps.append(unix_timestamp_milliseconds)
 
         if timestamps:
             # Sort timestamps to ensure consistent indexing (oldest first)
@@ -424,6 +425,7 @@ def update_orgasm_history_from_scenes(scenes: Iterable[Dict[str, Any]]) -> None:
         for index, timestamp in enumerate(timestamps):
             # Use orgasm_index starting from 0 for each scene
             # This allows tracking all orgasms from all scenes as a unified history
+            # Timestamp is stored in milliseconds for Grafana dateTime unit compatibility
             stash_orgasm_timestamp_seconds.labels(scene_id=scene_id, orgasm_index=str(index)).set(timestamp)
 
 

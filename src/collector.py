@@ -285,7 +285,7 @@ class StashCollector:
         orgasm_metric = GaugeMetricFamily(
             "stash_scene_o_counter",
             "Current orgasm counter value per scene (only scenes with o_counter > 0 are exported). Use increase() in PromQL to calculate new events over time windows.",
-            labels=["scene_id"],
+            labels=["scene_id", "scene_name"],
         )
 
         for scene in scenes:
@@ -295,7 +295,8 @@ class StashCollector:
 
             o_counter = _safe_int(scene.get("o_counter", 0))
             if o_counter > 0:
-                orgasm_metric.add_metric([scene_id], float(o_counter))
+                scene_name = str(scene.get("title", "") or scene_id)
+                orgasm_metric.add_metric([scene_id, scene_name], float(o_counter))
 
         yield orgasm_metric
 

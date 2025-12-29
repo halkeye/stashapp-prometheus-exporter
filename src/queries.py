@@ -43,6 +43,7 @@ query ScenePlayHistory {
   findScenes(filter: { per_page: -1 }) {
     scenes {
       id
+      title
       organized
       stash_ids { endpoint stash_id }
       tags { name }

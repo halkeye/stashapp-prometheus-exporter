@@ -1,19 +1,8 @@
 # StashApp Prometheus Exporter
 
-Prometheus exporter for StashApp that exposes library stats, curation coverage, and playtime metrics via GraphQL.
+A Prometheus exporter for StashApp that exposes your library stats, play patterns, and engagement metrics via GraphQL. Perfect for tracking your collection growth, watching habits, and seeing which scenes get the most love.
 
-## What it does
-
-Queries your Stash instance and exposes metrics like total scenes, images, performers, watch time, play patterns (by day of week and hour of day), and how well your library is organized (organized flag, tags, performers, studios, stashids, markers) on `/metrics` for Prometheus to scrape.
-
-This exporter follows Prometheus best practices by using **synchronous scraping**: metrics are only collected when Prometheus requests them, not on a timer. This ensures:
-- Metrics are always fresh when Prometheus scrapes
-- No stale labels (deleted scenes/tags are automatically cleared)
-- Fully stateless operation
-
-These queries are based on the public Stash GraphQL API documentation (`https://docs.stashapp.cc/api`) and are intended to return cheap, aggregated statistics suitable for exporter usage.
-
-## Run with Docker / Podman
+## Quick Start
 
 ```bash
 podman run --rm -p 9100:9100 \
@@ -22,7 +11,7 @@ podman run --rm -p 9100:9100 \
   ghcr.io/evolite/stashapp-prometheus-exporter:latest
 ```
 
-For a complete stack example with Stash, Prometheus, and Grafana, see `podman-compose.yml` in this repository.
+That's it! Point Prometheus at `http://localhost:9100/metrics` and you're good to go.
 
 ## Configuration
 
@@ -31,13 +20,17 @@ For a complete stack example with Stash, Prometheus, and Grafana, see `podman-co
 - `EXPORTER_LISTEN_PORT` - Metrics port (default: `9100`)
 - `LOG_LEVEL` - Python log level (default: `INFO`)
 
-**Note:** This exporter uses synchronous scraping - metrics are collected when Prometheus requests them, not on a timer. The scrape interval is controlled by Prometheus's `scrape_interval` configuration, not the exporter.
+The exporter uses synchronous scraping - metrics are collected when Prometheus requests them, not on a timer. This means your metrics are always fresh and there's no stale data hanging around.
 
 ## Metrics
 
-### Library statistics
+All metrics are prefixed with `stash_` and follow Prometheus naming conventions. Here's what you get:
+
+### Library Stats
+
+Basic counts of everything in your library:
 - `stash_scenes_total` - Total scenes
-- `stash_images_total` - Total images
+- `stash_images_total` - Total images  
 - `stash_galleries_total` - Total galleries
 - `stash_performers_total` - Total performers
 - `stash_studios_total` - Total studios
@@ -47,7 +40,9 @@ For a complete stack example with Stash, Prometheus, and Grafana, see `podman-co
 - `stash_files_size_bytes` - Total file size in bytes
 - `stash_scenes_duration_seconds` - Total scene duration in seconds
 
-### Curation / coverage
+### Curation & Coverage
+
+How well-organized is your library? These metrics help you track that:
 - `stash_scenes_organized_total` - Scenes marked as organized
 - `stash_scenes_with_stashid_total` - Scenes with at least one StashID
 - `stash_scenes_tagged_total` - Scenes with at least one tag
@@ -57,26 +52,84 @@ For a complete stack example with Stash, Prometheus, and Grafana, see `podman-co
 - `stash_scenes_with_markers_total` - Scenes with at least one marker
 - `stash_scene_markers_total` - Total number of scene markers
 
-You can derive the "missing" side and ratios in PromQL, for example:
-
-- Unorganized scenes: `stash_scenes_total - stash_scenes_organized_total`
+**Pro tip:** Calculate coverage ratios with PromQL:
 - StashID coverage: `stash_scenes_with_stashid_total / stash_scenes_total`
+- Organization rate: `stash_scenes_organized_total / stash_scenes_total`
 
-### Play statistics
+### Play Statistics
+
+Track your viewing habits:
 - `stash_total_play_count` - Total number of scene plays
-- `stash_total_play_duration_seconds` - Total play duration across all scenes in seconds
+- `stash_total_play_duration_seconds` - Total play duration across all scenes
 - `stash_scenes_played_total` - Scenes that have at least one recorded play
 - `stash_total_o_count` - Total orgasm counter across all scenes
 
-### Playtime patterns
-- `stash_play_duration_seconds_by_dow{day_of_week}` - Play duration by day of week (Mon, Tue, Wed, Thu, Fri, Sat, Sun)
-- `stash_play_duration_seconds_by_hour{hour_of_day}` - Play duration by hour of day (0-23)
+### Playtime Patterns
 
-### Exporter health
-- `stash_up` - 1 if the last scrape of Stash GraphQL succeeded, 0 otherwise
-- `stash_scrape_duration_seconds` - Time spent on the last scrape in seconds
-- `stash_scrapes_total{status="success|failure"}` - Total number of scrape attempts
+When do you watch? These metrics break it down:
+- `stash_play_duration_seconds_by_dow{day_of_week}` - Play duration by day of week
+  - Labels: `Mon`, `Tue`, `Wed`, `Thu`, `Fri`, `Sat`, `Sun`
+- `stash_play_duration_seconds_by_hour{hour_of_day}` - Play duration by hour of day
+  - Labels: `0` through `23` (24-hour format)
 
-See `dashboards/stashapp-overview.json` for a Grafana dashboard that uses all of these.
+### Tag Usage
 
-Images are automatically built and pushed to GHCR on pushes to `main` and version tags.
+See which tags are most popular among your played scenes:
+- `stash_tag_usage_count{tag_name}` - Number of played scenes using each tag
+  - Only the top 100 tags by usage are exported to limit cardinality
+
+### Orgasm Events
+
+Track orgasm events per scene:
+- `stash_scene_o_counter{scene_id, scene_name}` - Current orgasm counter value per scene
+  - Only scenes with `o_counter > 0` are exported
+  - Use `increase(stash_scene_o_counter[5m])` in PromQL to see new events over time
+  - Use `topk(5, stash_scene_o_counter)` to see your top 5 scenes
+
+### Exporter Health
+
+Is the exporter working? These metrics tell you:
+- `stash_up` - 1 if the last scrape succeeded, 0 otherwise
+- `stash_scrape_duration_seconds` - Time spent on the last scrape
+- `stash_scrapes_total{status="success|failure"}` - Total scrape attempts
+
+## Example Queries
+
+```promql
+# Your most watched scenes
+topk(10, stash_scene_o_counter)
+
+# New orgasm events in the last hour
+sum(increase(stash_scene_o_counter[1h]))
+
+# Play duration by day of week
+stash_play_duration_seconds_by_dow
+
+# Library growth rate
+rate(stash_scenes_total[1d])
+```
+
+## Dashboard
+
+Check out `dashboards/stashapp-overview.json` for a ready-to-use Grafana dashboard that visualizes all these metrics. Just import it into Grafana and you're set!
+
+## How It Works
+
+The exporter queries your Stash instance via GraphQL and exposes metrics using Prometheus's custom Collector pattern. This means:
+- **Synchronous scraping** - Metrics are fresh when Prometheus requests them
+- **No stale labels** - Deleted scenes/tags automatically disappear
+- **Fully stateless** - No cached data between scrapes
+
+All queries are based on the [public Stash GraphQL API documentation](https://docs.stashapp.cc/api).
+
+## Building
+
+Images are automatically built and pushed to GHCR on pushes to `main` and version tags. You can also build locally:
+
+```bash
+podman build -t stashapp-exporter .
+```
+
+---
+
+Happy monitoring! 📊

@@ -61,7 +61,7 @@ Track your viewing habits:
 - `stash_total_play_count` - Total number of scene plays
 - `stash_total_play_duration_seconds` - Total play duration across all scenes
 - `stash_scenes_played_total` - Scenes that have at least one recorded play
-- `stash_total_o_count` - Total orgasm counter across all scenes
+- `stash_total_o_count` - Total o-count counter across all scenes
 
 ### Playtime Patterns
 
@@ -77,10 +77,10 @@ See which tags are most popular among your played scenes:
 - `stash_tag_usage_count{tag_name}` - Number of played scenes using each tag
   - Only the top 100 tags by usage are exported to limit cardinality
 
-### Orgasm Events
+### O-Count Events
 
-Track orgasm events per scene:
-- `stash_scene_o_counter{scene_id, scene_name}` - Current orgasm counter value per scene
+Track o-count events per scene:
+- `stash_scene_o_counter{scene_id, scene_name}` - Current o-count counter value per scene
   - Only scenes with `o_counter > 0` are exported
   - Use `increase(stash_scene_o_counter[5m])` in PromQL to see new events over time
   - Use `topk(5, stash_scene_o_counter)` to see your top 5 scenes
@@ -98,7 +98,7 @@ Is the exporter working? These metrics tell you:
 # Your most watched scenes
 topk(10, stash_scene_o_counter)
 
-# New orgasm events in the last hour
+# New o-count events in the last hour
 sum(increase(stash_scene_o_counter[1h]))
 
 # Play duration by day of week

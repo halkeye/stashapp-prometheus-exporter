@@ -54,7 +54,8 @@
           "refId": "Anno"
         },
         "textFormat": "http://localhost:9999/scenes/{{scene_id}}",
-        "titleFormat": "{{scene_name}}"
+        "titleFormat": "{{scene_name}}",
+        "useValueForTime": false
       }
     ]
   },
@@ -410,6 +411,7 @@
           },
           "decimals": 1,
           "mappings": [],
+          "noValue": "0",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -434,6 +436,8 @@
         "y": 5
       },
       "id": 33,
+      "interval": "1d",
+      "maxDataPoints": 1,
       "options": {
         "legend": {
           "calcs": [],
@@ -1629,13 +1633,21 @@
       "pluginVersion": "12.3.1",
       "targets": [
         {
+          "editorMode": "code",
+          "exemplar": false,
           "expr": "stash_scenes_total",
+          "instant": false,
           "legendFormat": "Scenes total",
+          "range": true,
           "refId": "A"
         },
         {
+          "editorMode": "code",
+          "exemplar": false,
           "expr": "stash_images_total",
+          "instant": false,
           "legendFormat": "Images total",
+          "range": true,
           "refId": "B"
         },
         {
@@ -1795,5 +1807,5 @@
   "timezone": "browser",
   "title": "StashApp Library & Playback Overview",
   "uid": "stashapp-overview",
-  "version": 83
+  "version": 86
 }
